@@ -16,8 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Author: dsmaldone
-# Released under GNU/GPL3 
-# see here: https://www.gnu.org/licenses/gpl-3.0.en.html
+# Released under GNU/GPL3 see here: https://www.gnu.org/licenses/gpl-3.0.en.html
+# Source: https://github.com/dsmaldone/FreePBX/blob/master/vm-auto-delete.sh
 #
 # Adjustable Parameters
 # vm_dir: Voicemail directory root fullpath
