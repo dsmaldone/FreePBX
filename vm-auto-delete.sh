@@ -28,14 +28,45 @@
 #
 # Important: If the 'find' program it’s not found - Give Up!
 
-days=2
-vm_dir=“/var/spool/asterisk/voicemail/”
+#!/bin/sh
+# A Simple Tool to remote Voicemail Messages older than $days
+# vm_dir = Voicemail directory root
+# days = number of days to go back to start deleting messages
+# If find program it's not found - Give Up!
+
+narg=$#
+
+days=30
+vm_dir="/var/spool/asterisk/voicemail/"
+
 
 find_loc=$(command -v find)
-if [ $? != 0 ]
-then
-        echo “Find Command not here! Giving Up!”
+ftest=$?
+
+if [ $ftest != 0 ]; then
+        echo "Find Command not here! Giving Up!"
+        exit 2
+fi
+
+if [ $narg -gt 1 ]; then
+        echo "Invalid number of arguments. Script accepts 0 or 1 argument."
+        echo "If no argument is input, voicemails of all the existing extensions will be deleted."
+        echo "To select 1 or more than 1 ext use comma e.g. 100 or 200,300"
+        exit 1
+elif [ $narg -eq 0 ]; then
+        logger $(date) - Executed Vociemail Cleanup: All voicemail messages older than $days days have been deleted
+        $find_loc $vm_dir -name "msg*" -mtime +$days -type f -exec rm -rf {} \;
 else
-        logger $(date) Executed Vociemail Cleanup: All messages older than $days days have been deleted
-        $find_loc $vm_dir -name “msg*” -mtime +$days -type f -exec rm -rf {} \;
+        for i in $(echo $1 | sed "s/,/ /g")
+        do
+                curvm=$vm_dir/default/$i
+                if [ -d "$curvm" ]; then
+                        logger $(date) - Checking Extension $i Voicemail
+                        $find_loc $curvm -name "msg*" -mtime +$days -type f -exec rm -rf {} \;
+                        # Uncomment follow line for debug
+                        # echo "checked $i"
+                        vmchecked="${vmchecked}$i,"
+                fi
+        done
+        logger $(date) - Executed Voicemail Cleanup: All $vmchecked messages older than $days days have been deleted
 fi
